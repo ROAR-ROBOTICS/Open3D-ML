@@ -93,6 +93,7 @@ class SemanticSegmentation():
             self.losses = []
             step = 0
 
+            """
             for idx, inputs in enumerate(tqdm(train_loader, desc='training')):
                 with tf.GradientTape() as tape:
                     results = model(inputs, training=True)
@@ -109,7 +110,7 @@ class SemanticSegmentation():
                 self.accs.append(acc)
                 self.ious.append(iou)
                 step = step + 1
-
+            """
 
 
             # --------------------- validation
