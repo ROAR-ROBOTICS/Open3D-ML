@@ -32,8 +32,8 @@ class ParisLille3D(BaseDataset):
                  use_cache=False,
                  num_points=65536,
                  class_weights=[
-                     65075320, 33014819, 656096, 61715, 296523, 4052947, 172132,
-                     4212295, 10599237
+                    53033221, 25821560, 546190, 54417,   
+                    180638, 3998129, 160899, 3441844, 9681606
                  ],
                  test_result_folder='./test',
                  val_files=['Lille2.ply'],

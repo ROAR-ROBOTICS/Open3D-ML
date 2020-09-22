@@ -180,7 +180,6 @@ class RandLANet(BaseModel):
 
         t_normalize = cfg.get('t_normalize', None)
         pc, feat = trans_normalize(pc, feat, t_normalize)
-
         if attr['split'] in ['training', 'train']:
             t_augment = cfg.get('t_augment', None)
             pc = trans_augment(pc, t_augment)
@@ -190,8 +189,28 @@ class RandLANet(BaseModel):
         else:
             feat = np.concatenate([pc, feat], axis=1)
 
+
+        ones = np.ones_like(pc[:, :1], dtype=np.float32)
+        if self.cfg.dim_input == 1:
+            feat = ones
+        elif self.cfg.dim_input == 2:
+            # Use original height coordinate
+            feat = np.hstack((ones, pc[:, 2:]))
+        elif self.cfg.dim_input == 3:
+            feat = pc
+        elif self.cfg.dim_input == 4:
+            assert feat.shape[1] == 3, "feat from dataset should have 3 dims"
+            # Use height + color 
+            feat = np.hstack((pc[:, 2:], feat))
+        elif self.cfg.dim_input >= 5:
+            assert feat.shape[1] >= 2, "feat from dataset should have at least 2 dims"
+            # Use all coordinates + feature
+            feat = np.hstack((pc, feat))
+        else:
+            raise ValueError('in_features_dim should be > 0')
+
         assert cfg.dim_input == feat.shape[
-            1], "Wrong feature dimension, please update dim_input(3 + feature_dimension) in config"
+            1], "Wrong feature dimension dim_input"
 
         features = feat
         input_points = []
