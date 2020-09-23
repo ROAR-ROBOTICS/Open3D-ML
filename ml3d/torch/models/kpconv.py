@@ -443,14 +443,6 @@ class KPFCNN(BaseModel):
                 reproj_mask = np.zeros((0,))
 
 
-            # t_normalize = self.cfg.get('t_normalize', None)
-            # print(in_pts.shape, in_fts.shape)
-            # in_pts, in_fts, p0 = trans_normalize(in_pts, in_fts, t_normalize, p0)
-            # in_fts[:,:3] = in_pts
-            # print(in_pts.shape, in_fts.shape)
-
-            
-
             # Data augmentation
             in_pts, scale, R = self.augmentation_transform(in_pts)
 
