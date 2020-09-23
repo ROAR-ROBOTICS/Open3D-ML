@@ -327,6 +327,8 @@ class KPFCNN(BaseModel):
         else:
             dim_features = feat.shape[1] + dim_points
 
+        print("-----------------1")
+
         # Initiate merged points
         merged_points = np.zeros((0, dim_points), dtype=np.float32)
         merged_labels = np.zeros((0,), dtype=np.int32)
@@ -360,6 +362,7 @@ class KPFCNN(BaseModel):
         min_in_points = self.cfg.get('min_in_points', 3)
         min_in_points = min(min_in_points, self.cfg.max_in_points)
 
+        print("-----------------2")
         while curr_num_points < min_in_points:
             new_points = points.copy()
 
@@ -394,6 +397,7 @@ class KPFCNN(BaseModel):
                 curr_new_coords = np.hstack(
                     (curr_new_points, feat[rand_order, :]))
 
+            print("-----------------3")
             in_pts, in_fts, in_lbls = DataProcessing.grid_subsampling(
                 curr_new_points,
                 features=curr_new_coords,
@@ -419,7 +423,7 @@ class KPFCNN(BaseModel):
                 n = input_inds.shape[0]
 
             curr_num_points += n
-
+            print("-----------------4")
             # Before augmenting, compute reprojection inds (only for validation and test)
             if attr['split'] in ['test']:
                 # get val_points that are in range
@@ -441,11 +445,13 @@ class KPFCNN(BaseModel):
             else:
                 proj_inds = np.zeros((0,))
                 reproj_mask = np.zeros((0,))
+            print("-----------------5")
 
 
             # Data augmentation
             in_pts, scale, R = self.augmentation_transform(in_pts)
 
+            print("-----------------6")
             # Color augmentation
             if np.random.rand() > self.cfg.augment_color:
                 in_fts[:, 3:] *= 0
