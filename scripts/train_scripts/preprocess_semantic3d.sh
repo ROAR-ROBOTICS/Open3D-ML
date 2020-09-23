@@ -8,4 +8,4 @@ fi
 
 cd ../..
 python preprocess_semantic3d.py --dataset_path /export/share/Datasets/Semantic3D \
---out_path /export/share/Datasets/Semantic3D_split
+--out_path $1
