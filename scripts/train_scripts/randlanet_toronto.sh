@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH -p gpu 
 #SBATCH --gres=gpu:1 
+#SBATCH -c 4
 
 
 if [ "$#" -ne 1 ]; then
