@@ -18,6 +18,10 @@ from ...utils import MODEL
 from ...datasets.utils import DataProcessing, create_3D_rotations
 
 
+from ...datasets.utils import (DataProcessing, trans_normalize, 
+                                create_3D_rotations)
+
+
 class KPFCNN(BaseModel):
     """
     Class defining KPFCNN
@@ -438,6 +442,15 @@ class KPFCNN(BaseModel):
                 proj_inds = np.zeros((0,))
                 reproj_mask = np.zeros((0,))
 
+
+            # t_normalize = self.cfg.get('t_normalize', None)
+            # print(in_pts.shape, in_fts.shape)
+            # in_pts, in_fts, p0 = trans_normalize(in_pts, in_fts, t_normalize, p0)
+            # in_fts[:,:3] = in_pts
+            # print(in_pts.shape, in_fts.shape)
+
+            
+
             # Data augmentation
             in_pts, scale, R = self.augmentation_transform(in_pts)
 
@@ -454,6 +467,7 @@ class KPFCNN(BaseModel):
             data['r_inds_list'] += [proj_inds]
             data['r_mask_list'] += [reproj_mask]
             data['val_labels_list'] += [o_labels]
+
 
         return data
 

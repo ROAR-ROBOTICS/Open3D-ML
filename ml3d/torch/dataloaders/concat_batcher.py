@@ -66,6 +66,7 @@ class SemanticKittiCustomBatch:
         scales = np.array(s_list, dtype=np.float32)
         rots = np.stack(R_list, axis=0)
 
+
         # Input features (Use reflectance, input height or all coordinates)
         stacked_features = np.ones_like(stacked_points[:, :1], dtype=np.float32)
         if self.cfg.in_features_dim == 1:

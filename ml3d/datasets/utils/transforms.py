@@ -3,7 +3,7 @@ import random
 from .operations import create_3D_rotations
 
 
-def trans_normalize(pc, feat, t_normalize):
+def trans_normalize(pc, feat, t_normalize, p0=None):
     if t_normalize is None or t_normalize.get('method', None) is None:
         return pc, feat
 
@@ -23,7 +23,12 @@ def trans_normalize(pc, feat, t_normalize):
     elif method == 'coords_only':
         feat = None
 
-    return pc, feat
+    if p0 is None:
+        return pc, feat
+    else:
+        p0 -= points_bias
+        p0 /= points_scale
+        return pc, feat, p0
 
 
 def trans_augment(points, t_augment):

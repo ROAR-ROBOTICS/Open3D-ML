@@ -141,13 +141,20 @@ class ParisLille3DSplit():
         self.split = split
         self.dataset = dataset
 
+        self.data_list = [None] * len(path_list)
+
     def __len__(self):
         return len(self.path_list)
 
     def get_data(self, idx):
         pc_path = self.path_list[idx]
         log.debug("get_data called {}".format(pc_path))
-        data = PlyData.read(pc_path)['vertex']
+
+        if self.data_list[idx] is None:
+            data = PlyData.read(pc_path)['vertex']
+            self.data_list[idx] = data
+        else:
+            data = self.data_list[idx]
 
         points = np.zeros((data['x'].shape[0], 3), dtype=np.float32)
         points[:, 0] = data['x']
