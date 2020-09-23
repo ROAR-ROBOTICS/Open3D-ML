@@ -109,7 +109,6 @@ class Toronto3D(BaseDataset):
 
         return files
 
-
     def is_tested(self, attr):
         cfg = self.cfg
         name = attr['name']

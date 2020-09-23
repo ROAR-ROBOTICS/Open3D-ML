@@ -216,10 +216,6 @@ class SemanticSegmentation(BasePipeline):
                 acc = metric.acc(predict_scores, gt_labels)
                 iou = metric.iou(predict_scores, gt_labels)
 
-                # pred_label = torch.max(predict_scores, dim=-2).indices
-                # print(results.size())
-                # print(acc[-1], iou[-1])
-
                 self.losses.append(loss.cpu().item())
                 self.accs.append(acc)
                 self.ious.append(iou)

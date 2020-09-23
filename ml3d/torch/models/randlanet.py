@@ -180,14 +180,10 @@ class RandLANet(BaseModel):
 
         t_normalize = cfg.get('t_normalize', None)
         pc, feat = trans_normalize(pc, feat, t_normalize)
+
         if attr['split'] in ['training', 'train']:
             t_augment = cfg.get('t_augment', None)
             pc = trans_augment(pc, t_augment)
-
-        if feat is None:
-            feat = pc.copy()
-        else:
-            feat = np.concatenate([pc, feat], axis=1)
 
 
         ones = np.ones_like(pc[:, :1], dtype=np.float32)
@@ -208,6 +204,7 @@ class RandLANet(BaseModel):
             feat = np.hstack((pc, feat))
         else:
             raise ValueError('in_features_dim should be > 0')
+
 
         assert cfg.dim_input == feat.shape[
             1], "Wrong feature dimension dim_input"
@@ -274,8 +271,6 @@ class RandLANet(BaseModel):
         inds = inputs['data']['point_inds'][0, :]
         self.test_probs[inds] = self.test_smooth * self.test_probs[inds] + (
             1 - self.test_smooth) * probs
-
-        print(np.min(self.possibility))
 
         if np.min(self.possibility) > 0.5:
             pred_labels = np.argmax(self.test_probs, 1)
