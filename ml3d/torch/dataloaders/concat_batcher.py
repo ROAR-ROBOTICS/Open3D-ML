@@ -66,8 +66,6 @@ class SemanticKittiCustomBatch:
         scales = np.array(s_list, dtype=np.float32)
         rots = np.stack(R_list, axis=0)
 
-        print("-----------------7")
-
         # Input features (Use reflectance, input height or all coordinates)
         stacked_features = np.ones_like(stacked_points[:, :1], dtype=np.float32)
         if self.cfg.in_features_dim == 1:
@@ -91,7 +89,6 @@ class SemanticKittiCustomBatch:
             # Use color + height
             stacked_features = np.hstack((stacked_features, features[:, 2:6]))
         elif self.cfg.in_features_dim >= 6:
-
             assert features.shape[1] > 3, "feat from dataset can not be None \
                         or try to set in_features_dim = 1, 2, 4"
 
@@ -108,11 +105,9 @@ class SemanticKittiCustomBatch:
         #
 
         # Get the whole input list
-        print("-----------------7")
         input_list = self.segmentation_inputs(stacked_points, stacked_features,
                                               labels.astype(np.int64),
                                               stack_lengths)
-        print("-----------------8")
 
         # Add scale and rotation for testing
         input_list += [
@@ -165,10 +160,59 @@ class SemanticKittiCustomBatch:
         self.reproj_masks = input_list[ind]
         ind += 1
         self.val_labels = input_list[ind]
-        print("-----------------9")
 
         return
 
+    # def __init__(self, input_list):
+    #     print("batcher")
+    #     print(len(input_list))
+    #     # Get rid of batch dimension
+    #     input_list = input_list[0]['data']
+
+    #     # Number of layers
+    #     L = int(input_list[0])
+
+    #     # Extract input tensors from the list of numpy array
+    #     ind = 1
+    #     self.points = [
+    #         torch.from_numpy(nparray) for nparray in input_list[ind:ind + L]
+    #     ]
+    #     ind += L
+    #     self.neighbors = [
+    #         torch.from_numpy(nparray) for nparray in input_list[ind:ind + L]
+    #     ]
+    #     ind += L
+    #     self.pools = [
+    #         torch.from_numpy(nparray) for nparray in input_list[ind:ind + L]
+    #     ]
+    #     ind += L
+    #     self.upsamples = [
+    #         torch.from_numpy(nparray) for nparray in input_list[ind:ind + L]
+    #     ]
+    #     ind += L
+    #     self.lengths = [
+    #         torch.from_numpy(nparray) for nparray in input_list[ind:ind + L]
+    #     ]
+    #     ind += L
+    #     self.features = torch.from_numpy(input_list[ind])
+    #     ind += 1
+    #     self.labels = torch.from_numpy(input_list[ind])
+    #     ind += 1
+    #     self.scales = torch.from_numpy(input_list[ind])
+    #     ind += 1
+    #     self.rots = torch.from_numpy(input_list[ind])
+    #     ind += 1
+    #     self.frame_inds = torch.from_numpy(input_list[ind])
+    #     ind += 1
+    #     self.frame_centers = torch.from_numpy(input_list[ind])
+    #     ind += 1
+    #     self.reproj_inds = input_list[ind]
+    #     ind += 1
+    #     self.reproj_masks = input_list[ind]
+    #     ind += 1
+    #     self.val_labels = input_list[ind]
+
+    #     return
 
     def big_neighborhood_filter(self, neighbors, layer):
         """
@@ -233,7 +277,6 @@ class SemanticKittiCustomBatch:
 
             # Pooling neighbors indices
             # *************************
-            print("1-----------------10")
 
             # If end of layer is a pooling operation
             if 'pool' in block or 'strided' in block:
@@ -341,7 +384,6 @@ class SemanticKittiCustomBatch:
         self.frame_inds = self.frame_inds.to(device)
         self.frame_centers = self.frame_centers.to(device)
 
-        print("-----------------10")
         return self
 
     def unstack_points(self, layer=None):
