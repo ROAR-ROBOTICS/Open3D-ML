@@ -81,9 +81,11 @@ class ParisLille3D(BaseDataset):
         self.val_files = [
             f for f in self.train_files if Path(f).name in cfg.val_files
         ]
-        self.train_files = [
-            f for f in self.train_files if f not in self.val_files
-        ]
+
+        # To submit
+        # self.train_files = [
+        #     f for f in self.train_files if f not in self.val_files
+        # ]
 
         test_path = cfg.dataset_path + "/test_10_classes/"
         self.test_files = glob.glob(test_path + '*.ply')
