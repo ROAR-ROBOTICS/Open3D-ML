@@ -93,26 +93,43 @@ def get_custom_data(pc_names, path):
 
     return pc_data
 
-def pred_custom_data(pc_names, pcs, pipeline):
+def pred_custom_data(pc_names, pcs, pipeline_r, pipeline_k):
     vis_points = []
     for i, data in enumerate(pcs):
         name = pc_names[i]
-        results = pipeline.run_inference(data)
-        # pred_label = np.expand_dims(results['predict_labels']+1, 0).astype(np.int32)
-        # pred_label[0,0] = 0
-        pred_label = (results['predict_labels']+1).astype(np.int32)
-        pred_label[0] = 0
+
+        results_r = pipeline_r.run_inference(data)
+        pred_label_r = (results_r['predict_labels']+1).astype(np.int32)
+        pred_label_r[0] = 0
+
+
+        results_k = pipeline_k.run_inference(data)
+        pred_label_k = (results_k['predict_labels']+1).astype(np.int32)
+        pred_label_k[0] = 0
+
         label = data['label']
-
-
         pts = data['point']
+        
         vis_d = {
             "name": name,
             "points": pts,
             "labels": label,
-            "pred": pred_label,
+            "pred": pred_label_k,
         }
-
+        vis_points.append(vis_d)
+        
+        vis_d = {
+            "name": name + "_randlanet",
+            "points": pts,
+            "labels": pred_label_r,
+        }
+        vis_points.append(vis_d)
+        
+        vis_d = {
+            "name": name + "_kpconv",
+            "points": pts,
+            "labels": pred_label_k,
+        }
         vis_points.append(vis_d)
 
     return vis_points
@@ -174,6 +191,8 @@ def main():
             cmd = "wget {} -O {}".format(randlanet_url, ckpt_path)
             os.system(cmd)
         model = RandLANet(ckpt_path=ckpt_path)
+        pipeline_r = SemanticSegmentation(model)
+        pipeline_r.load_ckpt(model.cfg.ckpt_path, is_train=False)
 
 
         ckpt_path = "../dataset/checkpoints/vis_weights_{}.pth".format('KPFCNN')
@@ -181,12 +200,12 @@ def main():
             cmd = "wget {} -O {}".format(kpconv_url, ckpt_path)
             os.system(cmd)
         model = KPFCNN(ckpt_path=ckpt_path, in_radius=10)
+        pipeline_k = SemanticSegmentation(model)
+        pipeline_k.load_ckpt(model.cfg.ckpt_path, is_train=False)
 
-        pipeline = SemanticSegmentation(model)
-        pipeline.load_ckpt(model.cfg.ckpt_path, is_train=False)
 
         pcs = get_custom_data(pc_names, path)
-        pcs_with_pred = pred_custom_data(pc_names, pcs, pipeline)
+        pcs_with_pred = pred_custom_data(pc_names, pcs, pipeline_r, pipeline_k)
 
         v.visualize(pcs_with_pred)
     else:
