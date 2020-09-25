@@ -401,6 +401,7 @@ class KPFCNN(BaseModel):
             n = in_pts.shape[0]
             # Safe check
             if n < 2:
+                self.possibility[wanted_ind] += 0.001
                 continue
 
             # Randomly drop some points (augmentation process and safety for GPU memory consumption)
@@ -516,7 +517,6 @@ class KPFCNN(BaseModel):
             self.test_probs[proj_mask, :] = frame_probs
 
             i0 += length
-        print(np.min(self.possibility))
         if np.min(self.possibility) > 0.5:
             inference_result = {
                 'predict_labels': np.argmax(self.test_probs, 1),

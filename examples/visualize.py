@@ -64,44 +64,53 @@ def parse_args():
 
 
 
-def get_custom_data(path):
-    pc_names = [
-        "kitti_01_points_000000.npy", 
-        "kitti_01_points_000001.npy"
-    ]
-    pc_labels = [
-        "kitti_01_labels_000000.npy", 
-        "kitti_01_labels_000001.npy"
-    ]
+def get_custom_data(pc_names, path):
+    
 
     pc_data = []
     for i, name in enumerate(pc_names):
-        pc_path = join(path, name)
-        label_path = join(path, pc_labels[i])
-        point = np.load(pc_path)
-        np.load(path + "/kitti_01_labels_000000.npy")
+        pc_path = join(path, 'points', name + '.npy')
+        label_path = join(path, 'labels', name + '.npy')
+        point = np.load(pc_path)[:, 0:3]
+        label = np.squeeze(np.load(label_path))
+        print(point.shape)
+        print(np.max(point, 0), np.min(point, 0))
+        print(label.shape)
+
+
+        if i == 0:
+            point = (point - np.array([0., 100., 0.])).astype(np.float32)
+            print(point)
+            print(point.shape)
+      
+
         data = {
-            'point': point[:, 0:3],
+            'point': point,
             'feat': None,
-            'label': np.squeeze(np.load(label_path)) ,
+            'label': label,
         }
         pc_data.append(data)
 
     return pc_data
 
-def pred_custom_data(pcs, pipeline):
+def pred_custom_data(pc_names, pcs, pipeline):
     vis_points = []
     for i, data in enumerate(pcs):
+        name = pc_names[i]
         results = pipeline.run_inference(data)
-        pred_label = np.expand_dims(results['predict_labels']+1, 0).astype(np.int32)
-        pred_label[0,0] = 0
+        # pred_label = np.expand_dims(results['predict_labels']+1, 0).astype(np.int32)
+        # pred_label[0,0] = 0
+        pred_label = (results['predict_labels']+1).astype(np.int32)
+        pred_label[0] = 0
+        label = data['label']
+
 
         pts = data['point']
         vis_d = {
-            "name": "{:05d}".format(i),
+            "name": name,
             "points": pts,
-            "labels": data['label'],
-            "pred": pred_label
+            "labels": label,
+            "pred": pred_label,
         }
 
         vis_points.append(vis_d)
@@ -139,9 +148,6 @@ def main():
         print("[ERROR] '" + which + "' is not a valid dataset")
         print_usage_and_exit()
 
-
-
-
     v = Visualizer()
     if dataset is None:  # custom
         lut = LabelLUT()
@@ -149,28 +155,38 @@ def main():
             lut.add_label(kitti_labels[val], val)
         v.set_lut("labels", lut)
         v.set_lut("pred", lut)
-        path = os.path.dirname(os.path.realpath(__file__)) + "/data"
+        path = os.path.dirname(os.path.realpath(__file__)) + "/demo_data"
 
         kpconv_url = "https://storage.googleapis.com/open3d-releases/model-zoo/kpconv_semantickitti_202009090354utc.pth"
         randlanet_url = "https://storage.googleapis.com/open3d-releases/model-zoo/randlanet_semantickitti_202009090354utc.pth"
         ckpt_path = "../dataset/checkpoints/vis_weights_{}.pth".format(args.model)
 
-        if args.model == 'RandLANet':
-            if not exists(ckpt_path):
-                cmd = "wget {} -O {}".format(randlanet_url, ckpt_path)
-                os.system(cmd)
-            model = RandLANet(ckpt_path=ckpt_path)
-        elif args.model == 'KPFCNN':
-            if not exists(ckpt_path):
-                cmd = "wget {} -O {}".format(kpconv_url, ckpt_path)
-                os.system(cmd)
-            model = KPFCNN(ckpt_path=ckpt_path, in_radius=10)
+        pc_names = [
+            # "000001",
+            # "000600", 
+            # "000650",  
+            "000700", 
+            "000750"
+        ]
+
+        ckpt_path = "../dataset/checkpoints/vis_weights_{}.pth".format('RandLANet')
+        if not exists(ckpt_path):
+            cmd = "wget {} -O {}".format(randlanet_url, ckpt_path)
+            os.system(cmd)
+        model = RandLANet(ckpt_path=ckpt_path)
+
+
+        ckpt_path = "../dataset/checkpoints/vis_weights_{}.pth".format('KPFCNN')
+        if not exists(ckpt_path):
+            cmd = "wget {} -O {}".format(kpconv_url, ckpt_path)
+            os.system(cmd)
+        model = KPFCNN(ckpt_path=ckpt_path, in_radius=10)
 
         pipeline = SemanticSegmentation(model)
         pipeline.load_ckpt(model.cfg.ckpt_path, is_train=False)
 
-        pcs = get_custom_data(path)
-        pcs_with_pred = pred_custom_data(pcs, pipeline)
+        pcs = get_custom_data(pc_names, path)
+        pcs_with_pred = pred_custom_data(pc_names, pcs, pipeline)
 
         v.visualize(pcs_with_pred)
     else:
