@@ -51,21 +51,17 @@ kitti_labels = {
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description='Visualize Datasets')
+    parser = argparse.ArgumentParser(description='Visualize Datasets')
     parser.add_argument('dataset_name')
     parser.add_argument('dataset_path')
     parser.add_argument('--model', default='RandLANet')
 
     args = parser.parse_args()
 
-
     return args
 
 
-
 def get_custom_data(pc_names, path):
-    
 
     pc_data = []
     for i, name in enumerate(pc_names):
@@ -73,16 +69,6 @@ def get_custom_data(pc_names, path):
         label_path = join(path, 'labels', name + '.npy')
         point = np.load(pc_path)[:, 0:3]
         label = np.squeeze(np.load(label_path))
-        print(point.shape)
-        print(np.max(point, 0), np.min(point, 0))
-        print(label.shape)
-
-
-        if i == 0:
-            point = (point - np.array([0., 100., 0.])).astype(np.float32)
-            print(point)
-            print(point.shape)
-      
 
         data = {
             'point': point,
@@ -93,23 +79,23 @@ def get_custom_data(pc_names, path):
 
     return pc_data
 
+
 def pred_custom_data(pc_names, pcs, pipeline_r, pipeline_k):
     vis_points = []
     for i, data in enumerate(pcs):
         name = pc_names[i]
 
         results_r = pipeline_r.run_inference(data)
-        pred_label_r = (results_r['predict_labels']+1).astype(np.int32)
+        pred_label_r = (results_r['predict_labels'] + 1).astype(np.int32)
         pred_label_r[0] = 0
 
-
         results_k = pipeline_k.run_inference(data)
-        pred_label_k = (results_k['predict_labels']+1).astype(np.int32)
+        pred_label_k = (results_k['predict_labels'] + 1).astype(np.int32)
         pred_label_k[0] = 0
 
         label = data['label']
         pts = data['point']
-        
+
         vis_d = {
             "name": name,
             "points": pts,
@@ -117,14 +103,14 @@ def pred_custom_data(pc_names, pcs, pipeline_r, pipeline_k):
             "pred": pred_label_k,
         }
         vis_points.append(vis_d)
-        
+
         vis_d = {
             "name": name + "_randlanet",
             "points": pts,
             "labels": pred_label_r,
         }
         vis_points.append(vis_d)
-        
+
         vis_d = {
             "name": name + "_kpconv",
             "points": pts,
@@ -140,10 +126,8 @@ def pred_custom_data(pc_names, pcs, pipeline_r, pipeline_k):
 from ml3d.torch.pipelines import SemanticSegmentation
 from ml3d.torch.models import RandLANet, KPFCNN
 
-def main():
-    # if len(sys.argv) != 3:
-    #     print_usage_and_exit()
 
+def main():
     args = parse_args()
 
     which = args.dataset_name
@@ -176,24 +160,19 @@ def main():
 
         kpconv_url = "https://storage.googleapis.com/open3d-releases/model-zoo/kpconv_semantickitti_202009090354utc.pth"
         randlanet_url = "https://storage.googleapis.com/open3d-releases/model-zoo/randlanet_semantickitti_202009090354utc.pth"
-        ckpt_path = "../dataset/checkpoints/vis_weights_{}.pth".format(args.model)
+        ckpt_path = "../dataset/checkpoints/vis_weights_{}.pth".format(
+            args.model)
 
-        pc_names = [
-            # "000001",
-            # "000600", 
-            # "000650",  
-            "000700", 
-            "000750"
-        ]
+        pc_names = ["000700", "000750"]
 
-        ckpt_path = "../dataset/checkpoints/vis_weights_{}.pth".format('RandLANet')
+        ckpt_path = "../dataset/checkpoints/vis_weights_{}.pth".format(
+            'RandLANet')
         if not exists(ckpt_path):
             cmd = "wget {} -O {}".format(randlanet_url, ckpt_path)
             os.system(cmd)
         model = RandLANet(ckpt_path=ckpt_path)
         pipeline_r = SemanticSegmentation(model)
         pipeline_r.load_ckpt(model.cfg.ckpt_path, is_train=False)
-
 
         ckpt_path = "../dataset/checkpoints/vis_weights_{}.pth".format('KPFCNN')
         if not exists(ckpt_path):
@@ -202,7 +181,6 @@ def main():
         model = KPFCNN(ckpt_path=ckpt_path, in_radius=10)
         pipeline_k = SemanticSegmentation(model)
         pipeline_k.load_ckpt(model.cfg.ckpt_path, is_train=False)
-
 
         pcs = get_custom_data(pc_names, path)
         pcs_with_pred = pred_custom_data(pc_names, pcs, pipeline_r, pipeline_k)
