@@ -1,0 +1,17 @@
+regular arguments
+cfg_dataset: null
+cfg_file: ml3d/configs/kpconv_semantic3d.yml
+cfg_model: null
+cfg_pipeline: null
+dataset: null
+dataset_path: ../dataset/Semantic3D_2000
+device: gpu
+framework: tf
+main_log_dir: null
+model: null
+pipeline: SemanticSegmentation
+split: train
+
+extra arguments
+{}
+
