@@ -105,7 +105,7 @@ class RandLANet(BaseModel):
     def init_building_block(self, dim_input, dim_output, name):
         f_pc = helper_tf.conv2d(True, dim_input)
 
-        setattr(self, name + 'bdmlp1', f_pc)
+        setattr(self, name + 'mlp1', f_pc)
 
         self.init_att_pooling(dim_input * 2, dim_output // 2,
                               name + 'att_pooling_1')
@@ -179,7 +179,7 @@ class RandLANet(BaseModel):
 
     def forward_building_block(self, xyz, feature, neigh_idx, name):
         f_xyz = self.forward_relative_pos_encoding(xyz, neigh_idx)
-        m_conv2d = getattr(self, name + 'bdmlp1')
+        m_conv2d = getattr(self, name + 'mlp1')
 
         f_xyz = m_conv2d(f_xyz, training=self.training)
 

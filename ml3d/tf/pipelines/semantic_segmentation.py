@@ -15,6 +15,8 @@ from ..modules.metrics import SemSegMetric
 from ..dataloaders import TFDataloader
 from ...utils import make_dir, LogRecord, PIPELINE, get_runid, code2md
 
+from tf2keras_randlanet import tf2keras
+
 logging.setLogRecordFactory(LogRecord)
 logging.basicConfig(
     level=logging.INFO,
@@ -22,6 +24,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+        
 
 class SemanticSegmentation(BasePipeline):
 
@@ -168,6 +171,9 @@ class SemanticSegmentation(BasePipeline):
 
         self.optimizer = model.get_optimizer(cfg)
         self.load_ckpt(ckpt_path=model.cfg.ckpt_path)
+
+
+
         for epoch in range(0, cfg.max_epoch + 1):
             log.info("=== EPOCH {}/{} ===".format(epoch, cfg.max_epoch))
             # --------------------- training
@@ -183,6 +189,8 @@ class SemanticSegmentation(BasePipeline):
                     loss, gt_labels, predict_scores = model.get_loss(
                         Loss, results, inputs)
 
+                tf2keras(model)
+                break
 
                 if predict_scores.shape[0] == 0:
                     continue
@@ -212,6 +220,8 @@ class SemanticSegmentation(BasePipeline):
 
                 acc = Metric.acc(predict_scores, gt_labels)
                 iou = Metric.iou(predict_scores, gt_labels)
+
+                print(acc[-1], iou[-1])
                 
 
                 self.losses.append(loss.numpy())
@@ -225,28 +235,30 @@ class SemanticSegmentation(BasePipeline):
             self.valid_losses = []
             step = 0
 
-            for idx, inputs in enumerate(
-                    tqdm(valid_loader, total=len_val, desc='validation')):
-                with tf.GradientTape() as tape:
-                    results = model(inputs, training=False)
-                    loss, gt_labels, predict_scores = model.get_loss(
-                        Loss, results, inputs)
+            # for idx, inputs in enumerate(
+            #         tqdm(valid_loader, total=len_val, desc='validation')):
+            #     with tf.GradientTape() as tape:
+            #         results = model(inputs, training=False)
+            #         loss, gt_labels, predict_scores = model.get_loss(
+            #             Loss, results, inputs)
 
-                if predict_scores.shape[0] == 0:
-                    continue
+            #     if predict_scores.shape[0] == 0:
+            #         continue
 
-                acc = Metric.acc(predict_scores, gt_labels)
-                iou = Metric.iou(predict_scores, gt_labels)
+            #     acc = Metric.acc(predict_scores, gt_labels)
+            #     iou = Metric.iou(predict_scores, gt_labels)
 
-                self.valid_losses.append(loss.numpy())
-                self.valid_accs.append(acc)
-                self.valid_ious.append(iou)
-                step = step + 1
+            #     self.valid_losses.append(loss.numpy())
+            #     self.valid_accs.append(acc)
+            #     self.valid_ious.append(iou)
+            #     step = step + 1
 
-            self.save_logs(writer, epoch)
+            # self.save_logs(writer, epoch)
 
             if epoch % cfg.save_ckpt_freq == 0:
                 self.save_ckpt(epoch)
+
+            exit()
 
     def save_logs(self, writer, epoch):
         accs = np.nanmean(np.array(self.accs), axis=0)

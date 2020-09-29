@@ -1,0 +1,17 @@
+regular arguments
+cfg_dataset: null
+cfg_file: ml3d/configs/randlanet_semantickitti.yml
+cfg_model: null
+cfg_pipeline: null
+dataset: null
+dataset_path: ../dataset/SemanticKITTI
+device: gpu
+framework: tf
+main_log_dir: null
+model: null
+pipeline: SemanticSegmentation
+split: train
+
+extra arguments
+{}
+
