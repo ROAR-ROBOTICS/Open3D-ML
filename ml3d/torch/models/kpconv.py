@@ -414,10 +414,12 @@ class KPFCNN(BaseModel):
                 wanted_ind = np.random.choice(new_points.shape[0])
 
             # print(new_points.shape, wanted_ind, p0)
-            p0 = new_points[wanted_ind]
+            p0 = new_points[wanted_ind].reshape(1, -1)
 
-            mask_inds = search_tree.query_radius(p0.reshape(1, -1),
-                                                 r=self.cfg.in_radius)[0]
+            # mask_inds = search_tree.query_radius(p0,
+            #                                      r=self.cfg.in_radius)[0]
+
+            mask_inds = search_tree.query(p0, k=min_in_points)[1][0]
 
             # Shuffle points
             rand_order = np.random.permutation(mask_inds)
@@ -1153,7 +1155,7 @@ class BatchNormBlock(nn.Module):
         self.use_bn = use_bn
         self.in_dim = in_dim
         if self.use_bn:
-            self.batch_norm = nn.BatchNorm1d(in_dim, momentum=bn_momentum)
+            self.batch_norm = nn.BatchNorm1d(in_dim, momentum=bn_momentum, eps=1e-6)
             #self.batch_norm = nn.InstanceNorm1d(in_dim, momentum=bn_momentum)
         else:
             self.bias = Parameter(torch.zeros(in_dim, dtype=torch.float32),

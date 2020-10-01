@@ -15,7 +15,7 @@ dataset:
   - '08'
 model:
   name: KPFCNN
-  ckpt_path: # path/to/your/checkpoint
+  ckpt_path: ../dataset/checkpoints/kpconv_semantickitti.pth # path/to/your/checkpoint
   KP_extent: 1.2
   KP_influence: linear
   aggregation_mode: sum

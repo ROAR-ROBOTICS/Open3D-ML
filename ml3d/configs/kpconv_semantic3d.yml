@@ -67,7 +67,7 @@ model:
   in_points_dim: 3
   in_radius: 6.0
   lbl_values: [0, 1, 2, 3, 4, 5, 6, 7, 8]
-  min_in_points: 5000
+  min_in_points: 8000
   max_in_points: 10000
   modulated: false
   num_classes: 8
